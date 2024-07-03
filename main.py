@@ -5,14 +5,14 @@ from botpy.manage import GroupManageEvent
 from botpy.message import Message, DirectMessage, GroupMessage, BaseMessage
 import os
 
-_log = botpy.logging.get_logger()
+import electricity
 
+_log = botpy.logging.get_logger()
 
 @Commands("查电费")
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
-    _log.info(params)
-    # 第一种用reply发送消息
-    await message.reply(content="电费为 0 元")
+    room_number = electricity.extract_room_number(params)
+    await message.reply(content=f"#{room_number} 的电费为 0.0 元")
     return True
 
 
