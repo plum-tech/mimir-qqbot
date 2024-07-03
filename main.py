@@ -54,5 +54,9 @@ intents = botpy.Intents(
 )
 client = MimirClient(intents=intents, is_sandbox=True, log_level=10, timeout=30)
 appid = os.getenv("QQBOT_APP_ID")
+if appid is None:
+    raise Exception('Missing "QQBOT_APP_ID" environment variable for your bot AppID')
 secret = os.getenv("QQBOT_APP_SECRET")
+if secret is None:
+    raise Exception('Missing "QQBOT_APP_SECRET" environment variable for your AppSecret')
 client.run(appid=appid, secret=secret)
