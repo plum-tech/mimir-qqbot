@@ -1,9 +1,24 @@
 import botpy
+from botpy import BotAPI
+from botpy.ext.command_util import Commands
 from botpy.manage import GroupManageEvent
-from botpy.message import Message, DirectMessage, GroupMessage
+from botpy.message import Message, DirectMessage, GroupMessage, BaseMessage
 import os
 
 _log = botpy.logging.get_logger()
+
+
+@Commands("查电费")
+async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
+    _log.info(params)
+    # 第一种用reply发送消息
+    await message.reply(content="电费为 0 元")
+    return True
+
+
+handlers = [
+    query_electricity_balance,
+]
 
 
 class MimirClient(botpy.Client):
@@ -11,6 +26,9 @@ class MimirClient(botpy.Client):
         _log.info(f"robot[{self.robot.name}] is ready.")
 
     async def on_group_at_message_create(self, message: GroupMessage):
+        for handler in handlers:
+            if await handler(api=self.api, message=message):
+                return
         await message.reply(content=message.content)
 
     async def on_group_add_robot(self, message: GroupManageEvent):
