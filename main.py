@@ -1,27 +1,32 @@
 import botpy
+import requests
 from botpy import BotAPI
 from botpy.ext.command_util import Commands
 from botpy.manage import GroupManageEvent
 from botpy.message import Message, DirectMessage, GroupMessage, BaseMessage
-import os
 
-import electricity
+import r
 
 _log = botpy.logging.get_logger()
 
 
 @Commands("查电费")
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
-    room_number = electricity.extract_room_number(params)
-    if room_number is None:
+    res = requests.post(f"{r.backend}/electricity/query", json={
+        "rawQuery": params,
+    })
+    result = res.json()
+    if res.status_code == 200:
+        balance = result
+        await message.reply(content=f"#{balance["roomNumber"]} 的电费为 {balance["balance"]:.2f} 元")
+        return True
+    elif result.reason == "roomNotFound":
         await message.reply(content=f"请输入正确的房间号")
         return True
-    balance = electricity.fetch(room_number)
-    if balance is None:
-        await message.reply(content=f"查询 #{room_number} 的电费失败")
+    elif result.reason == "fetchFailed":
+        await message.reply(content=f"查询 #{result.roomNumber} 的电费失败")
         return True
 
-    await message.reply(content=f"#{balance.room_number} 的电费为 {balance.balance:.2f} 元")
     return True
 
 
@@ -53,10 +58,5 @@ intents = botpy.Intents(
     # direct_message=True,
 )
 client = MimirClient(intents=intents, is_sandbox=True, log_level=10, timeout=30)
-appid = os.getenv("QQBOT_APP_ID")
-if appid is None:
-    raise Exception('Missing "QQBOT_APP_ID" environment variable for your bot AppID')
-secret = os.getenv("QQBOT_APP_SECRET")
-if secret is None:
-    raise Exception('Missing "QQBOT_APP_SECRET" environment variable for your AppSecret')
-client.run(appid=appid, secret=secret)
+
+client.run(appid=r.appid, secret=r.secret)
