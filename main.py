@@ -9,10 +9,19 @@ import electricity
 
 _log = botpy.logging.get_logger()
 
+
 @Commands("查电费")
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
     room_number = electricity.extract_room_number(params)
-    await message.reply(content=f"#{room_number} 的电费为 0.0 元")
+    if room_number is None:
+        await message.reply(content=f"请输入正确的房间号")
+        return True
+    balance = electricity.fetch(room_number)
+    if balance is None:
+        await message.reply(content=f"查询 #{room_number} 的电费失败")
+        return True
+
+    await message.reply(content=f"#{balance.room_number} 的电费为 {balance.balance:.2f} 元")
     return True
 
 
