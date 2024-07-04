@@ -12,3 +12,5 @@ if secret is None:
     raise Exception('Missing "QQBOT_APP_SECRET" environment variable for your AppSecret')
 
 backend = os.getenv("MIMIR_BACKEND_URL", default="http://api.mysit.life")
+
+MCServer = os.getenv("MC_SERVER_HOST", default="play.sitmc.club")
