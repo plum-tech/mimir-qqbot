@@ -4,3 +4,6 @@ Dockerfile
 .git
 README.md
 *.log
+.env
+.idea
+__pycache__/

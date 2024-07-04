@@ -8,6 +8,7 @@ from botpy.message import Message, DirectMessage, GroupMessage, BaseMessage
 import aiohttp
 
 import r
+import weather
 
 _log = botpy.logging.get_logger()
 
@@ -75,60 +76,28 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
         return True
 
 
+def weather4display(live: weather.WeatherLive, forcast: weather.WeatherForcast):
+    cast = forcast.casts[0]
+    return \
+        f"""{live.province} {live.city}: {live.weather}, {live.temperature}°C, 湿度{live.humidity}%, {live.wind_power}级{live.wind_direction}风.
+预测 {cast.date.month}月{cast.date.day}日: 白天{cast.day.temperature}°C, {cast.day.wind_power}级{cast.day.wind_direction}风; 夜间{cast.night.temperature}°C, {cast.night.wind_power}级{cast.night.wind_direction}风.
+"""
+
+
 @Commands("查天气")
 async def query_weather(api: BotAPI, message: GroupMessage, params=None):
-    fx_res, xh_res = await asyncio.gather(
-        session.get(f"https://restapi.amap.com/v3/weather/weatherInfo?city=310120&key=" + r.weather_api_token),
-        session.get(f"https://restapi.amap.com/v3/weather/weatherInfo?city=310104&key=" + r.weather_api_token)
+    fx, xh = await asyncio.gather(
+        weather.fetch(session, weather.City.feng_xian),
+        weather.fetch(session, weather.City.xu_hui),
     )
 
-    if fx_res.ok:
-        fx_result = await fx_res.json()
-        xh_result = await xh_res.json()
-        if fx_result.get("status") == "1" and "lives" in fx_result and len(fx_result["lives"]) > 0:
-            fx_live_data = fx_result["lives"][0]
-            xh_live_data = xh_result["lives"][0]
-
-            fx_weather = fx_live_data.get("weather", "N/A")
-            fx_temperature = fx_live_data.get("temperature", "N/A")
-            fx_winddirection = fx_live_data.get("winddirection", "N/A")
-            fx_windpower = fx_live_data.get("windpower", "N/A")
-            fx_humidity = fx_live_data.get("humidity", "N/A")
-
-            xh_weather = xh_live_data.get("weather", "N/A")
-            xh_temperature = xh_live_data.get("temperature", "N/A")
-            xh_winddirection = xh_live_data.get("winddirection", "N/A")
-            xh_windpower = xh_live_data.get("windpower", "N/A")
-            xh_humidity = xh_live_data.get("humidity", "N/A")
-
-            reporttime = fx_live_data.get("reporttime", "N/A")
-
-            reply_content = (
-                f"\n"
-                f"奉贤校区：\n"
-                f"天气：{fx_weather}\n"
-                f"温度：{fx_temperature}\n"
-                f"风向：{fx_winddirection}\n"
-                f"风力：{fx_windpower}\n"
-                f"湿度：{fx_humidity}\n"
-                f"\n"
-                f"徐汇校区：\n"
-                f"天气：{xh_weather}\n"
-                f"温度：{xh_temperature}\n"
-                f"风向：{xh_winddirection}\n"
-                f"风力：{xh_windpower}\n"
-                f"湿度：{xh_humidity}\n"
-                f"更新时间：{reporttime}"
-            )
-
-            await message.reply(content=reply_content)
-        else:
-            error_content = "查询失败，响应数据不正确"
-            await message.reply(content=error_content)
+    if fx is None or xh is None:
+        await message.reply(content="查询失败，无法连接到天气服务")
     else:
-        error_content = "查询失败，无法连接到天气服务"
-        await message.reply(content=error_content)
+        reply = f'\n{weather4display(*fx)}------------\n{weather4display(*xh)}'
+        await message.reply(content=reply)
     return True
+
 
 school_server_urls = {
     "教务系统": "https://xgfy.sit.edu.cn/unifri-flow/WF/Comm/ProcessRequest.do?DoType=DBAccess_RunSQLReturnTable",
@@ -136,9 +105,9 @@ school_server_urls = {
     "消费服务器": "https://xgfy.sit.edu.cn/yktapi/services/querytransservice/querytrans"
 }
 
+
 @Commands("学校服务状态")
 async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
-
     async def fetch_status(name, url):
         try:
             async with session.get(url, timeout=8) as response:
