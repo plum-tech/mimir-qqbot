@@ -78,9 +78,13 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
 
 def weather4display(live: weather.WeatherLive, forcast: weather.WeatherForcast):
     cast = forcast.casts[0]
+
+    def p(entry: weather.WeatherCastEntry):
+        return f"{entry.weather} {entry.temperature}°C, {entry.wind_power}级{entry.wind_direction}风"
+
     return \
         f"""{live.province} {live.city}: {live.weather}, {live.temperature}°C, 湿度{live.humidity}%, {live.wind_power}级{live.wind_direction}风.
-预测 {cast.date.month}月{cast.date.day}日: 白天{cast.day.temperature}°C, {cast.day.wind_power}级{cast.day.wind_direction}风; 夜间{cast.night.temperature}°C, {cast.night.wind_power}级{cast.night.wind_direction}风.
+预测 {cast.date.month}月{cast.date.day}日: 白天 {p(cast.day)}; 夜间 {p(cast.night)}.
 """
 
 
