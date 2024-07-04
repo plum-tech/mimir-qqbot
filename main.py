@@ -33,7 +33,7 @@ async def query_electricity_balance(message: GroupMessage, params=None):
 
 @Commands("服务状态")
 async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
-    async with session.post(f"https://mc.sjtu.cn/custom/serverlist/?query=" + r.MCServer) as res:
+    async with session.post(r.MCServerApi + r.MCServer) as res:
         result = await res.json()
         if res.ok:
             server_info = result
@@ -79,7 +79,35 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
 
 @Commands("查天气")
 async def query_weather(api: BotAPI, message: GroupMessage, params=None):
-    pass
+    async with session.post(r.WeatherApi + f"?key=" + r.WeatherApiToken + f"&city=310120") as res:
+        result = await res.json()
+        if res.ok:
+            data = result
+            if "lives" in data and len(data["lives"]) > 0:
+                live_data = data["lives"][0]
+                city = live_data.get("city", "N/A")
+                weather = live_data.get("weather", "N/A")
+                temperature = live_data.get("temperature", "N/A")
+                winddirection = live_data.get("winddirection", "N/A")
+                windpower = live_data.get("windpower", "N/A")
+                humidity = live_data.get("humidity", "N/A")
+                reporttime = live_data.get("reporttime", "N/A")
+
+                reply_content = (
+                    f"城市：{city}\n"
+                    f"天气：{weather}\n"
+                    f"温度：{temperature}\n"
+                    f"风向：{winddirection}\n"
+                    f"风力：{windpower}\n"
+                    f"湿度：{humidity}\n"
+                    f"更新时间：{reporttime}"
+                )
+
+                await message.reply(content=reply_content)
+            else:
+                error_content = (f"查询失败")
+                await message.reply(content=error_content)
+            pass
 
 
 @Commands("绑定")
