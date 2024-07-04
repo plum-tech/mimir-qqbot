@@ -18,7 +18,7 @@ session: aiohttp.ClientSession
 
 
 async def on_mimir_backend_error(message: GroupMessage):
-    await message.reply(content=f"小应生活服务无响应，请稍后再试，若此问题依然存在，请向管理员反馈")
+    await message.reply(content=f"小应生活服务无响应，请稍后再试，若此问题依然存在，请联系机器人管理员")
 
 
 @Commands("查电费")
