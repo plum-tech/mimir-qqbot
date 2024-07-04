@@ -1,7 +1,6 @@
 import asyncio
 
 import botpy
-import requests
 from botpy import BotAPI
 from botpy.ext.command_util import Commands
 from botpy.manage import GroupManageEvent
@@ -45,6 +44,7 @@ class MimirClient(botpy.Client):
         _log.info(f"robot[{self.robot.name}] is ready.")
 
     async def on_group_at_message_create(self, message: GroupMessage):
+        _log.info(f"Received: {message.content}")
         for handler in handlers:
             if await handler(api=self.api, message=message):
                 return
