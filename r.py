@@ -22,5 +22,3 @@ MCServerHost = os.getenv("MC_SERVER_HOST", default="play.sitmc.club")
 WeatherApiToken = os.getenv("WEATHER_API_TOKEN")
 if MCServerHost is None:
     raise Exception('Missing "WEATHER_API_TOKEN" environment variable for your AppSecret')
-
-WeatherApi = os.getenv("WEATHER_API", default="https://restapi.amap.com/v3/weather/weatherInfo?")
