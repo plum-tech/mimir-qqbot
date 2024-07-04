@@ -15,7 +15,7 @@ session: aiohttp.ClientSession
 
 
 @Commands("查电费")
-async def query_electricity_balance(message: GroupMessage, params=None):
+async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
     async with session.post(f"{r.backend}/electricity/query", json={
         "rawQuery": params,
     }) as res:
@@ -45,10 +45,10 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             image_url = "https://status.minecraftservers.org/nether/663801.png"
 
-            uploadMedia = await message._api.post_group_file(
+            uploadMedia = await api.post_group_file(
                 group_openid=message.group_openid,
                 file_type=1,
-                url= image_url
+                url=image_url
             )
 
             reply_content = (
@@ -60,14 +60,11 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
                 f"查询时间: {timestamp}"
             )
 
-            await message._api.post_group_message(
+            await message.reply(
                 content=reply_content,
-                group_openid=message.group_openid,
                 msg_type=7,
-                msg_id=message.id,
                 media=uploadMedia
             )
-            return True
         else:
             error_content = (
                 f"查询SITMC服务器信息失败\n"
@@ -75,75 +72,74 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
                 f"响应内容: {result}"
             )
             await message.reply(content=error_content)
-            return True
+        return True
 
 
 @Commands("查天气")
 async def query_weather(api: BotAPI, message: GroupMessage, params=None):
-    async with aiohttp.ClientSession() as session:
-        fx_res, xh_res = await asyncio.gather(
-            session.get(f"https://restapi.amap.com/v3/weather/weatherInfo?city=310120&key=" + r.WeatherApiToken),
-            session.get(f"https://restapi.amap.com/v3/weather/weatherInfo?city=310104&key=" + r.WeatherApiToken)
-        )
+    fx_res, xh_res = await asyncio.gather(
+        session.get(f"https://restapi.amap.com/v3/weather/weatherInfo?city=310120&key=" + r.weather_api_token),
+        session.get(f"https://restapi.amap.com/v3/weather/weatherInfo?city=310104&key=" + r.weather_api_token)
+    )
 
-        if fx_res.ok:
-            fx_result = await fx_res.json()
-            xh_result = await xh_res.json()
-            if fx_result.get("status") == "1" and "lives" in fx_result and len(fx_result["lives"]) > 0:
-                fx_live_data = fx_result["lives"][0]
-                xh_live_data = xh_result["lives"][0]
+    if fx_res.ok:
+        fx_result = await fx_res.json()
+        xh_result = await xh_res.json()
+        if fx_result.get("status") == "1" and "lives" in fx_result and len(fx_result["lives"]) > 0:
+            fx_live_data = fx_result["lives"][0]
+            xh_live_data = xh_result["lives"][0]
 
-                fx_weather = fx_live_data.get("weather", "N/A")
-                fx_temperature = fx_live_data.get("temperature", "N/A")
-                fx_winddirection = fx_live_data.get("winddirection", "N/A")
-                fx_windpower = fx_live_data.get("windpower", "N/A")
-                fx_humidity = fx_live_data.get("humidity", "N/A")
+            fx_weather = fx_live_data.get("weather", "N/A")
+            fx_temperature = fx_live_data.get("temperature", "N/A")
+            fx_winddirection = fx_live_data.get("winddirection", "N/A")
+            fx_windpower = fx_live_data.get("windpower", "N/A")
+            fx_humidity = fx_live_data.get("humidity", "N/A")
 
-                xh_weather = xh_live_data.get("weather", "N/A")
-                xh_temperature = xh_live_data.get("temperature", "N/A")
-                xh_winddirection = xh_live_data.get("winddirection", "N/A")
-                xh_windpower = xh_live_data.get("windpower", "N/A")
-                xh_humidity = xh_live_data.get("humidity", "N/A")
+            xh_weather = xh_live_data.get("weather", "N/A")
+            xh_temperature = xh_live_data.get("temperature", "N/A")
+            xh_winddirection = xh_live_data.get("winddirection", "N/A")
+            xh_windpower = xh_live_data.get("windpower", "N/A")
+            xh_humidity = xh_live_data.get("humidity", "N/A")
 
-                reporttime = fx_live_data.get("reporttime", "N/A")
+            reporttime = fx_live_data.get("reporttime", "N/A")
 
-                reply_content = (
-                    f"\n"
-                    f"奉贤校区：\n"
-                    f"天气：{fx_weather}\n"
-                    f"温度：{fx_temperature}\n"
-                    f"风向：{fx_winddirection}\n"
-                    f"风力：{fx_windpower}\n"
-                    f"湿度：{fx_humidity}\n"
-                    f"\n"
-                    f"徐汇校区：\n"
-                    f"天气：{xh_weather}\n"
-                    f"温度：{xh_temperature}\n"
-                    f"风向：{xh_winddirection}\n"
-                    f"风力：{xh_windpower}\n"
-                    f"湿度：{xh_humidity}\n"
-                    f"更新时间：{reporttime}"
-                )
+            reply_content = (
+                f"\n"
+                f"奉贤校区：\n"
+                f"天气：{fx_weather}\n"
+                f"温度：{fx_temperature}\n"
+                f"风向：{fx_winddirection}\n"
+                f"风力：{fx_windpower}\n"
+                f"湿度：{fx_humidity}\n"
+                f"\n"
+                f"徐汇校区：\n"
+                f"天气：{xh_weather}\n"
+                f"温度：{xh_temperature}\n"
+                f"风向：{xh_winddirection}\n"
+                f"风力：{xh_windpower}\n"
+                f"湿度：{xh_humidity}\n"
+                f"更新时间：{reporttime}"
+            )
 
-                await message.reply(content=reply_content)
-            else:
-                error_content = "查询失败，响应数据不正确"
-                await message.reply(content=error_content)
+            await message.reply(content=reply_content)
         else:
-            error_content = "查询失败，无法连接到天气服务"
+            error_content = "查询失败，响应数据不正确"
             await message.reply(content=error_content)
-        return True
+    else:
+        error_content = "查询失败，无法连接到天气服务"
+        await message.reply(content=error_content)
+    return True
 
+school_server_urls = {
+    "教务系统": "https://xgfy.sit.edu.cn/unifri-flow/WF/Comm/ProcessRequest.do?DoType=DBAccess_RunSQLReturnTable",
+    "电费服务器": "https://myportal.sit.edu.cn/?rnd=1",
+    "消费服务器": "https://xgfy.sit.edu.cn/yktapi/services/querytransservice/querytrans"
+}
 
 @Commands("学校服务状态")
 async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
-    urls = {
-        "教务系统": "https://xgfy.sit.edu.cn/unifri-flow/WF/Comm/ProcessRequest.do?DoType=DBAccess_RunSQLReturnTable",
-        "电费服务器": "https://myportal.sit.edu.cn/?rnd=1",
-        "消费服务器": "https://xgfy.sit.edu.cn/yktapi/services/querytransservice/querytrans"
-    }
 
-    async def fetch_status(session, name, url):
+    async def fetch_status(name, url):
         try:
             async with session.get(url, timeout=8) as response:
                 if response.status == 200:
@@ -155,26 +151,20 @@ async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
         except aiohttp.ClientError:
             return name, "连接超时"
 
-    async def check_server_status(urls):
-        async with aiohttp.ClientSession() as session:
-            tasks = [fetch_status(session, name, url) for name, url in urls.items()]
-            statuses = await asyncio.gather(*tasks)
+    tasks = [fetch_status(name, url) for name, url in school_server_urls.items()]
+    statuses = await asyncio.gather(*tasks)
 
-            status_dict = dict(statuses)
+    status_dict = dict(statuses)
 
-            reply_content = (
-                f"\n"
-                f"教务系统: {status_dict['教务系统']}\n"
-                f"电费服务器: {status_dict['电费服务器']}\n"
-                f"消费服务器: {status_dict['消费服务器']}\n"
-            )
+    reply_content = (
+        f"\n"
+        f"教务系统: {status_dict['教务系统']}\n"
+        f"电费服务器: {status_dict['电费服务器']}\n"
+        f"消费服务器: {status_dict['消费服务器']}\n"
+    )
 
-        await message.reply(content=reply_content)
-
-
-@Commands("绑定")
-async def bind_context(api: BotAPI, message: GroupMessage, params=None):
-    pass
+    await message.reply(content=reply_content)
+    return True
 
 
 handlers = [
@@ -194,7 +184,7 @@ class MimirClient(botpy.Client):
         for handler in handlers:
             if await handler(api=self.api, message=message):
                 return
-        await message.reply(content=message.content)
+        await message.reply(content=f'echo "{message.content}"')
 
     async def on_group_add_robot(self, message: GroupManageEvent):
         await self.api.post_group_message(group_openid=message.group_openid, content="我进群了，哥")

@@ -13,6 +13,6 @@ if secret is None:
 
 backend = os.getenv("MIMIR_BACKEND_URL", default="http://api.mysit.life")
 
-WeatherApiToken = os.getenv("WEATHER_API_TOKEN")
-if MCServerHost is None:
+weather_api_token = os.getenv("WEATHER_API_TOKEN")
+if weather_api_token is None:
     raise Exception('Missing "WEATHER_API_TOKEN" environment variable for your AppSecret')
