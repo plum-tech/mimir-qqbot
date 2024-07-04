@@ -133,17 +133,10 @@ async def query_weather(api: BotAPI, message: GroupMessage, params=None):
             await message.reply(content=error_content)
         return True
 
-
-@Commands("绑定")
-async def bind_context(api: BotAPI, message: GroupMessage, params=None):
-    pass
-
-
 handlers = [
     query_electricity_balance,
     query_sitmc_server,
     query_weather,
-    bind_context,
 ]
 
 
