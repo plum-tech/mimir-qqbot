@@ -31,9 +31,9 @@ async def query_electricity_balance(message: GroupMessage, params=None):
         return True
 
 
-@Commands("服务状态")
+@Commands("SITMC服务器")
 async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
-    async with session.post(r.MCServerApi + r.MCServer) as res:
+    async with session.post(r.MCServerApi + r.MCServerHost) as res:
         result = await res.json()
         if res.ok:
             server_info = result
@@ -67,6 +67,7 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
                 msg_id=message.id,
                 media=uploadMedia
             )
+            return True
         else:
             error_content = (
                 f"查询SITMC服务器信息失败\n"
@@ -74,7 +75,7 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
                 f"响应内容: {result}"
             )
             await message.reply(content=error_content)
-        return True
+            return True
 
 
 @Commands("查天气")
@@ -133,10 +134,54 @@ async def query_weather(api: BotAPI, message: GroupMessage, params=None):
             await message.reply(content=error_content)
         return True
 
+
+@Commands("学校服务状态")
+async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
+    urls = {
+        "教务系统": "https://xgfy.sit.edu.cn/unifri-flow/WF/Comm/ProcessRequest.do?DoType=DBAccess_RunSQLReturnTable",
+        "电费服务器": "https://myportal.sit.edu.cn/?rnd=1",
+        "消费服务器": "https://xgfy.sit.edu.cn/yktapi/services/querytransservice/querytrans"
+    }
+
+    async def fetch_status(session, name, url):
+        try:
+            async with session.get(url, timeout=8) as response:
+                if response.status == 200:
+                    return name, "正常运行"
+                else:
+                    return name, "连接超时"
+        except asyncio.TimeoutError:
+            return name, "连接超时"
+        except aiohttp.ClientError:
+            return name, "连接超时"
+
+    async def check_server_status(urls):
+        async with aiohttp.ClientSession() as session:
+            tasks = [fetch_status(session, name, url) for name, url in urls.items()]
+            statuses = await asyncio.gather(*tasks)
+
+            status_dict = dict(statuses)
+
+            reply_content = (
+                f"\n"
+                f"教务系统: {status_dict['教务系统']}\n"
+                f"电费服务器: {status_dict['电费服务器']}\n"
+                f"消费服务器: {status_dict['消费服务器']}\n"
+            )
+
+        await message.reply(content=reply_content)
+
+
+@Commands("绑定")
+async def bind_context(api: BotAPI, message: GroupMessage, params=None):
+    pass
+
+
 handlers = [
     query_electricity_balance,
     query_sitmc_server,
     query_weather,
+    query_school_server,
 ]
 
 
