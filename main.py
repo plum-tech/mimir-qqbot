@@ -32,7 +32,7 @@ async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=N
         return True
 
 
-@Commands("SITMC服务器")
+@Commands("sitmc")
 async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
     async with session.post(f"https://mc.sjtu.cn/custom/serverlist/?query=play.sitmc.club") as res:
         result = await res.json()
