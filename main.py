@@ -24,21 +24,21 @@ async def on_mimir_backend_error(message: GroupMessage):
 @Commands("查电费")
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
     try:
-        async with session.post(f"{r.backend}/electricity/query", json={
-            "rawQuery": params,
+        async with session.get(f"{r.backend}/electricity/query", params={
+            "raw": params,
         }) as res:
             result = await res.json()
             if res.ok:
                 balance = result
                 await message.reply(content=f"#{balance['roomNumber']} 的电费为 {balance['balance']:.2f} 元")
-            elif result["reason"] == "roomNotFound":
+            elif result["message"] == "roomNotFound":
                 await message.reply(content=f"请输入正确的房间号")
-            elif result["reason"] == "fetchFailed":
+            elif result["message"] == "fetchFailed":
                 await message.reply(content=f"查询 #{result['roomNumber']} 的电费失败")
 
             return True
     except:
-        print_stack()
+        _log.error("failed to query electricity balance", exc_info=True)
         await on_mimir_backend_error(message)
         return True
 
