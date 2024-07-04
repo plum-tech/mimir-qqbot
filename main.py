@@ -181,7 +181,7 @@ handlers = [
     query_electricity_balance,
     query_sitmc_server,
     query_weather,
-    bind_context,
+    query_school_server,
 ]
 
 
