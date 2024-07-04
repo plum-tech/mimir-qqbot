@@ -18,7 +18,7 @@ async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=N
     result = res.json()
     if res.status_code == 200:
         balance = result
-        await message.reply(content=f"#{balance["roomNumber"]} 的电费为 {balance["balance"]:.2f} 元")
+        await message.reply(content=f"#{balance['roomNumber']} 的电费为 {balance['balance']:.2f} 元")
         return True
     elif result.reason == "roomNotFound":
         await message.reply(content=f"请输入正确的房间号")
