@@ -136,11 +136,28 @@ async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
     return True
 
 
+@Commands("下载地址")
+async def download_address(api: BotAPI, message: GroupMessage, params=None):
+    qrcode_media = await api.post_group_file(
+        group_openid=message.group_openid,
+        file_type=1,
+        url="https://g.mysit.life/static/img/qrcode.png"
+    )
+    content = "扫描二维码进入下载页。iOS用户可在App Store搜索小应生活。"
+    await message.reply(
+        content=content,
+        msg_type=7,
+        media=qrcode_media,
+    )
+    return True
+
+
 handlers = [
     query_electricity_balance,
     query_sitmc_server,
     query_weather,
     query_school_server,
+    download_address,
 ]
 
 
