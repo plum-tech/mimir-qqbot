@@ -23,13 +23,10 @@ async def query_electricity_balance(message: GroupMessage, params=None):
         if res.ok:
             balance = result
             await message.reply(content=f"#{balance['roomNumber']} 的电费为 {balance['balance']:.2f} 元")
-            return True
         elif result["reason"] == "roomNotFound":
             await message.reply(content=f"请输入正确的房间号")
-            return True
         elif result["reason"] == "fetchFailed":
             await message.reply(content=f"查询 #{result['roomNumber']} 的电费失败")
-            return True
 
         return True
 
@@ -62,6 +59,7 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
                 f"响应内容: {result}"
             )
             await message.reply(content=error_content)
+        return True
 
 handlers = [
     query_electricity_balance,
