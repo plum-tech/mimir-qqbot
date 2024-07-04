@@ -31,7 +31,7 @@ async def query_electricity_balance(message: GroupMessage, params=None):
         return True
 
 
-@Commands("查询SITMC状态")
+@Commands("服务状态")
 async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
     async with session.post(f"https://mc.sjtu.cn/custom/serverlist/?query=" + r.MCServer) as res:
         result = await res.json()
@@ -43,6 +43,13 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
             version = server_info.get('version', '未知')
 
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            image_url = "https://status.minecraftservers.org/nether/663801.png"
+
+            uploadMedia = await message._api.post_group_file(
+                group_openid=message.group_openid,
+                file_type=1,
+                url= image_url
+            )
 
             reply_content = (f"\n"
                 f"服务器名称: SIT-Minecraft\n"
@@ -51,7 +58,14 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
                 f"版本: {version}\n"
                 f"查询时间: {timestamp}"
             )
-            await message.reply(content=reply_content)
+
+            await message._api.post_group_message(
+                content=reply_content,
+                group_openid=message.group_openid,
+                msg_type=7,
+                msg_id=message.id,
+                media=uploadMedia
+            )
         else:
             error_content = (
                 f"查询SITMC服务器信息失败\n"
