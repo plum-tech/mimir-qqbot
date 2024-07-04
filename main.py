@@ -1,33 +1,38 @@
+import asyncio
+
 import botpy
 import requests
 from botpy import BotAPI
 from botpy.ext.command_util import Commands
 from botpy.manage import GroupManageEvent
 from botpy.message import Message, DirectMessage, GroupMessage, BaseMessage
+import aiohttp
 
 import r
 
 _log = botpy.logging.get_logger()
 
+session: aiohttp.ClientSession
+
 
 @Commands("查电费")
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
-    res = requests.post(f"{r.backend}/electricity/query", json={
+    async with session.post(f"{r.backend}/electricity/query", json={
         "rawQuery": params,
-    })
-    result = res.json()
-    if res.status_code == 200:
-        balance = result
-        await message.reply(content=f"#{balance["roomNumber"]} 的电费为 {balance["balance"]:.2f} 元")
-        return True
-    elif result.reason == "roomNotFound":
-        await message.reply(content=f"请输入正确的房间号")
-        return True
-    elif result.reason == "fetchFailed":
-        await message.reply(content=f"查询 #{result.roomNumber} 的电费失败")
-        return True
+    }) as res:
+        result = await res.json()
+        if res.status == 200:
+            balance = result
+            await message.reply(content=f"#{balance["roomNumber"]} 的电费为 {balance["balance"]:.2f} 元")
+            return True
+        elif result["reason"] == "roomNotFound":
+            await message.reply(content=f"请输入正确的房间号")
+            return True
+        elif result["reason"] == "fetchFailed":
+            await message.reply(content=f"查询 #{result["roomNumber"]} 的电费失败")
+            return True
 
-    return True
+        return True
 
 
 handlers = [
@@ -52,11 +57,17 @@ class MimirClient(botpy.Client):
         _log.info(f"robot[{self.robot.name}] left group ${event.group_openid}")
 
 
-intents = botpy.Intents(
-    public_messages=True,
-    # public_guild_messages=True,
-    # direct_message=True,
-)
-client = MimirClient(intents=intents, is_sandbox=True, log_level=10, timeout=30)
+async def main():
+    global session
+    session = aiohttp.ClientSession()
+    intents = botpy.Intents(
+        public_messages=True,
+        # public_guild_messages=True,
+        # direct_message=True,
+    )
+    client = MimirClient(intents=intents, is_sandbox=True, log_level=10, timeout=30)
+    await client.start(appid=r.appid, secret=r.secret)
+    await session.close()
 
-client.run(appid=r.appid, secret=r.secret)
+
+asyncio.run(main())
