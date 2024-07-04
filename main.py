@@ -51,7 +51,8 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
                 url= image_url
             )
 
-            reply_content = (f"\n"
+            reply_content = (
+                f"\n"
                 f"服务器名称: SIT-Minecraft\n"
                 f"描述: {description}\n"
                 f"在线玩家: {players_online}/{players_max}\n"
@@ -75,9 +76,22 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
             await message.reply(content=error_content)
         return True
 
+
+@Commands("查天气")
+async def query_weather(api: BotAPI, message: GroupMessage, params=None):
+    pass
+
+
+@Commands("绑定")
+async def bind_context(api: BotAPI, message: GroupMessage, params=None):
+    pass
+
+
 handlers = [
     query_electricity_balance,
     query_sitmc_server,
+    query_weather,
+    bind_context,
 ]
 
 
