@@ -1,5 +1,7 @@
 import asyncio
 import time
+from traceback import print_stack
+
 import botpy
 from botpy import BotAPI
 from botpy.ext.command_util import Commands
@@ -15,20 +17,29 @@ _log = botpy.logging.get_logger()
 session: aiohttp.ClientSession
 
 
+async def on_mimir_backend_error(message: GroupMessage):
+    await message.reply(content=f"小应生活服务无响应，请稍后再试，若此问题依然存在，请向管理员反馈")
+
+
 @Commands("查电费")
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
-    async with session.post(f"{r.backend}/electricity/query", json={
-        "rawQuery": params,
-    }) as res:
-        result = await res.json()
-        if res.ok:
-            balance = result
-            await message.reply(content=f"#{balance['roomNumber']} 的电费为 {balance['balance']:.2f} 元")
-        elif result["reason"] == "roomNotFound":
-            await message.reply(content=f"请输入正确的房间号")
-        elif result["reason"] == "fetchFailed":
-            await message.reply(content=f"查询 #{result['roomNumber']} 的电费失败")
+    try:
+        async with session.post(f"{r.backend}/electricity/query", json={
+            "rawQuery": params,
+        }) as res:
+            result = await res.json()
+            if res.ok:
+                balance = result
+                await message.reply(content=f"#{balance['roomNumber']} 的电费为 {balance['balance']:.2f} 元")
+            elif result["reason"] == "roomNotFound":
+                await message.reply(content=f"请输入正确的房间号")
+            elif result["reason"] == "fetchFailed":
+                await message.reply(content=f"查询 #{result['roomNumber']} 的电费失败")
 
+            return True
+    except:
+        print_stack()
+        await on_mimir_backend_error(message)
         return True
 
 
