@@ -21,7 +21,7 @@ async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=N
         "rawQuery": params,
     }) as res:
         result = await res.json()
-        if res.status == 200:
+        if res.ok:
             balance = result
             await message.reply(content=f"#{balance["roomNumber"]} 的电费为 {balance["balance"]:.2f} 元")
             return True
