@@ -1,6 +1,5 @@
 import asyncio
 import time
-from traceback import print_stack
 
 import botpy
 from botpy import BotAPI
@@ -24,22 +23,30 @@ async def on_mimir_backend_error(message: GroupMessage):
 @Commands("查电费")
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
     try:
-        async with session.get(f"{r.backend}/electricity/query", params={
-            "raw": params,
-        }) as res:
+        async with session.get(f"{r.backend}/electricity/query", params={"raw": params}) as res:
             result = await res.json()
             if res.ok:
                 balance = result
                 await message.reply(content=f"#{balance['roomNumber']} 的电费为 {balance['balance']:.2f} 元")
-            elif result["message"] == "roomNotFound":
-                await message.reply(content=f"请输入正确的房间号")
-            elif result["message"] == "fetchFailed":
-                await message.reply(content=f"查询 #{result['roomNumber']} 的电费失败")
+            else:
+                # 处理不同的错误消息
+                if result.get("message") == "roomNotFound":
+                    await message.reply(content="请输入正确的房间号")
+                elif result.get("message") == "fetchFailed":
+                    await message.reply(content=f"查询 #{result['roomNumber']} 的电费失败")
+                else:
+                    await message.reply(content="查询电费时出现未知错误")
 
-            return True
-    except:
-        _log.error("failed to query electricity balance", exc_info=True)
+    except aiohttp.ClientError as e:
+        _log.error("HTTP请求失败", exc_info=True)
+        await message.reply(content="无法连接到电费查询服务，请稍后再试")
+    except ValueError as e:
+        _log.error("解析响应失败", exc_info=True)
+        await message.reply(content="解析电费查询响应时出错")
+    except Exception as e:
+        _log.error("查询电费时出现未知错误", exc_info=True)
         await on_mimir_backend_error(message)
+    finally:
         return True
 
 
@@ -57,7 +64,7 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             image_url = "https://status.minecraftservers.org/nether/663801.png"
 
-            uploadMedia = await api.post_group_file(
+            uploadmedia = await api.post_group_file(
                 group_openid=message.group_openid,
                 file_type=1,
                 url=image_url
@@ -75,7 +82,7 @@ async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
             await message.reply(
                 content=reply_content,
                 msg_type=7,
-                media=uploadMedia
+                media=uploadmedia
             )
         else:
             error_content = (
@@ -91,12 +98,15 @@ def weather4display(live: weather.WeatherLive, forcast: weather.WeatherForcast):
     cast = forcast.casts[0]
 
     def p(entry: weather.WeatherCastEntry):
-        return f"{entry.weather} {entry.temperature}°C, {entry.wind_power}级{entry.wind_direction}风"
+        return f"{entry.weather} {entry.temperature}°C，{entry.wind_power}级{entry.wind_direction}风"
 
-    return \
-        f"""{live.province} {live.city}: {live.weather}, {live.temperature}°C, 湿度{live.humidity}%, {live.wind_power}级{live.wind_direction}风.
-预测 {cast.date.month}月{cast.date.day}日: 白天 {p(cast.day)}; 夜间 {p(cast.night)}.
-"""
+    return (
+        f"{live.province} {live.city}：\n"
+        f"{live.weather}，{live.temperature}°C，湿度{live.humidity}%，{live.wind_power}级{live.wind_direction}风\n"
+        f"预测 {cast.date.month}月{cast.date.day}日：\n"
+        f"白天 {p(cast.day)}\n"
+        f"夜间 {p(cast.night)}"
+    )
 
 
 @Commands("查天气")
@@ -109,7 +119,7 @@ async def query_weather(api: BotAPI, message: GroupMessage, params=None):
     if fx is None or xh is None:
         await message.reply(content="查询失败，无法连接到天气服务")
     else:
-        reply = f'\n{weather4display(*fx)}------------\n{weather4display(*xh)}'
+        reply = f'\n{weather4display(*fx)}\n------------\n{weather4display(*xh)}'
         await message.reply(content=reply)
     return True
 
