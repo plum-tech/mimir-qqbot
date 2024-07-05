@@ -144,7 +144,7 @@ async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
         f"\n"
         f"教务系统: {status_dict['教务系统']}\n"
         f"电费服务器: {status_dict['电费服务器']}\n"
-        f"消费服务器: {status_dict['消费服务器']}\n"
+        f"消费服务器: {status_dict['消费服务器']}"
     )
 
     await message.reply(content=reply_content)
