@@ -1,8 +1,10 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Tuple, Dict
 
 import aiohttp
 import enum
+from datetime import datetime
 
 import r
 
@@ -63,9 +65,18 @@ class City(enum.Enum):
     xu_hui = "310104"
 
 
+WeatherInfo = Tuple[WeatherLive, WeatherForcast]
+
+_cache: Dict[City, Tuple[datetime, WeatherInfo]] = {
+
+}
+
+_cache_duration = timedelta(minutes=15)
+
+
 async def fetch_live(session: aiohttp.ClientSession, city: City):
     async with session.get(
-            f"https://restapi.amap.com/v3/weather/weatherInfo?city={city.value}&key={r.weather_api_token}"
+      f"https://restapi.amap.com/v3/weather/weatherInfo?city={city.value}&key={r.weather_api_token}"
     ) as res:
         if not res.ok:
             return
@@ -89,7 +100,7 @@ async def fetch_live(session: aiohttp.ClientSession, city: City):
 
 async def fetch_forcast(session: aiohttp.ClientSession, city: City):
     async with session.get(
-            f"https://restapi.amap.com/v3/weather/weatherInfo?city={city.value}&extensions=all&key={r.weather_api_token}"
+      f"https://restapi.amap.com/v3/weather/weatherInfo?city={city.value}&extensions=all&key={r.weather_api_token}"
     ) as res:
         if not res.ok:
             return
@@ -115,9 +126,14 @@ async def fetch_forcast(session: aiohttp.ClientSession, city: City):
         )
 
 
-async def fetch(session: aiohttp.ClientSession, city: City):
-    live, forcast = await asyncio.gather(
+async def fetch(session: aiohttp.ClientSession, city: City) -> WeatherInfo:
+    if city in _cache:
+        time, info = _cache[city]
+        if (time + _cache_duration) > datetime.now():
+            return info
+    info = await asyncio.gather(
         fetch_live(session, city),
         fetch_forcast(session, city),
     )
-    return live, forcast
+    _cache[city] = (datetime.now(), info)
+    return info
