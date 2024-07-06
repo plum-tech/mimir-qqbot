@@ -1,5 +1,4 @@
 import asyncio
-import time
 
 import botpy
 from botpy import BotAPI
@@ -50,50 +49,6 @@ async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=N
         return True
 
 
-@Commands("sitmc")
-async def query_sitmc_server(api: BotAPI, message: GroupMessage, params=None):
-    async with session.post(f"https://mc.sjtu.cn/custom/serverlist/?query=play.sitmc.club") as res:
-        result = await res.json()
-        if res.ok:
-            server_info = result
-            description = server_info.get('description_raw', {}).get('extra', [{}])[0].get('text', '无描述')
-            players_max = server_info.get('players', {}).get('max', '未知')
-            players_online = server_info.get('players', {}).get('online', '未知')
-            version = server_info.get('version', '未知')
-
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            image_url = "https://status.minecraftservers.org/nether/663801.png"
-
-            uploadmedia = await api.post_group_file(
-                group_openid=message.group_openid,
-                file_type=1,
-                url=image_url
-            )
-
-            reply_content = (
-                f"\n"
-                f"服务器名称: SIT-Minecraft\n"
-                f"描述: {description}\n"
-                f"在线玩家: {players_online}/{players_max}\n"
-                f"版本: {version}\n"
-                f"查询时间: {timestamp}"
-            )
-
-            await message.reply(
-                content=reply_content,
-                msg_type=7,
-                media=uploadmedia
-            )
-        else:
-            error_content = (
-                f"查询SITMC服务器信息失败\n"
-                f"状态码: {res.status}\n"
-                f"响应内容: {result}"
-            )
-            await message.reply(content=error_content)
-        return True
-
-
 def weather4display(live: weather.WeatherLive, forcast: weather.WeatherForcast):
     cast = forcast.casts[0]
 
@@ -131,7 +86,7 @@ school_server_urls = {
 }
 
 
-@Commands("学校服务状态")
+@Commands("服务状态")
 async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
     async def fetch_status(name, url):
         try:
@@ -179,7 +134,6 @@ async def download_address(api: BotAPI, message: GroupMessage, params=None):
 
 handlers = [
     query_electricity_balance,
-    query_sitmc_server,
     query_weather,
     query_school_server,
     download_address,
