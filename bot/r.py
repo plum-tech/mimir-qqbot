@@ -3,16 +3,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-appid = os.getenv("QQBOT_APP_ID")
+appid = os.getenv("MIMIR_QQBOT_APP_ID")
 if appid is None:
-    raise Exception('Missing "QQBOT_APP_ID" environment variable for your bot AppID')
+    raise Exception('Missing "MIMIR_QQBOT_APP_ID" environment variable for your bot AppID')
 
-secret = os.getenv("QQBOT_APP_SECRET")
+secret = os.getenv("MIMIR_QQBOT_APP_SECRET")
 if secret is None:
-    raise Exception('Missing "QQBOT_APP_SECRET" environment variable for your AppSecret')
+    raise Exception('Missing "MIMIR_QQBOT_APP_SECRET" environment variable for your AppSecret')
 
 backend = os.getenv("MIMIR_BACKEND_URL", default="http://api.mysit.life")
 
-weather_api_token = os.getenv("WEATHER_API_TOKEN")
+weather_api_token = os.getenv("AMAP_WEATHER_API_TOKEN")
 if weather_api_token is None:
-    raise Exception('Missing "WEATHER_API_TOKEN" environment variable for your AppSecret')
+    raise Exception('Missing "AMAP_WEATHER_API_TOKEN" environment variable for your AppSecret')
