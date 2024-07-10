@@ -145,6 +145,7 @@ class MimirClient(botpy.Client):
         _log.info(f"robot[{self.robot.name}] is ready.")
 
     async def on_group_at_message_create(self, message: GroupMessage):
+        message.content = message.content.strip()
         _log.info(f"Received: {message.content}")
         for handler in handlers:
             if await handler(api=self.api, message=message):
