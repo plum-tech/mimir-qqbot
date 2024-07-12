@@ -3,6 +3,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+sandboxed = bool(os.getenv("MIMIR_QQBOT_SANDBOX"))
+if sandboxed:
+    print("Bot is running in sandboxed environment.")
+else:
+    print("Bot is running in production environment.")
+
 appid = os.getenv("MIMIR_QQBOT_APP_ID")
 if appid is None:
     raise Exception('Missing "MIMIR_QQBOT_APP_ID" environment variable for your bot AppID')
