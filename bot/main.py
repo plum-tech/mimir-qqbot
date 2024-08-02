@@ -151,6 +151,7 @@ class MimirClient(botpy.Client):
         _log.info(f"robot[{self.robot.name}] is ready.")
 
     async def on_group_at_message_create(self, message: GroupMessage):
+        message.content = message.content.strip()
         _log.info(f"Received: {message.content}")
         for handler in handlers:
             if await handler(api=self.api, message=message):
@@ -172,7 +173,7 @@ async def main():
         # public_guild_messages=True,
         # direct_message=True,
     )
-    client = MimirClient(intents=intents, is_sandbox=True, log_level=10, timeout=30)
+    client = MimirClient(intents=intents, is_sandbox=r.sandboxed, log_level=10, timeout=30)
     await client.start(appid=r.appid, secret=r.secret)
     await session.close()
 
