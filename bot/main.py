@@ -22,7 +22,13 @@ async def on_mimir_backend_error(message: GroupMessage):
 @Commands("查电费")
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
     try:
-        async with session.get(f"{r.backend}/electricity/query", params={"raw": params}) as res:
+        async with session.get(
+                f"{r.backend}/elevated/query", params={
+                    "raw": params
+                }, headers={
+                    "Cookie": f"MIMIR_BACKEND_ELEC_ELEVATED_TOKEN={r.backend_elec_token}"
+                }
+        ) as res:
             result = await res.json()
             if res.ok:
                 balance = result
