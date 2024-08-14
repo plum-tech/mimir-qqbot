@@ -1,5 +1,21 @@
-FROM python:3.12-alpine
-ADD . ./
+FROM python:3.12-alpine AS base
 
+# Stage 1: Build environment (discarded after building)
+FROM base AS builder
+
+WORKDIR /app
+
+COPY requirements.txt ./
 RUN pip install -r requirements.txt
-CMD python3 main.py
+
+# Stage 2: Running environment (slim image)
+FROM builder as app
+
+WORKDIR /app
+
+COPY --from=builder /app/ ./
+
+# Copy rest of the application code
+COPY . .
+
+CMD ["python3", "main.py"]

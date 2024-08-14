@@ -3,6 +3,12 @@
 ## How to install
 First, make sure you have installed the [Docker](https://www.docker.com/).
 
+## How to build
+```bash
+docker build . -t cr.liplum.net/mimir/qqbot:<tag>
+docker push cr.liplum.net/mimir/qqbot:<tag>
+```
+
 ## How to run
 Create a `docker-compose.yaml` file.
 ```yaml
