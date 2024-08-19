@@ -138,7 +138,7 @@ async def download_address(api: BotAPI, message: GroupMessage, params=None):
     return True
 
 
-@Commands("十大热帖")
+@Commands("热帖")
 async def forum_hot_discussion(api: BotAPI, message: GroupMessage, params=None, requests=None):
     url = "https://forum.mysit.life/api/discussions?sort=-commentCount&page%5Blimit%5D=10"
     headers = {
@@ -176,7 +176,8 @@ class MimirClient(botpy.Client):
         for handler in handlers:
             if await handler(api=self.api, message=message):
                 return
-        await message.reply(content=f'echo "{message.content}"')
+        if r.sandboxed:
+            await message.reply(content=f'echo "{message.content}"')
 
     async def on_group_add_robot(self, message: GroupManageEvent):
         await self.api.post_group_message(group_openid=message.group_openid, content="我进群了，哥")
