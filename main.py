@@ -137,12 +137,32 @@ async def download_address(api: BotAPI, message: GroupMessage, params=None):
     )
     return True
 
+@Commands("十大热帖")
+async def forum_hot_discussion(api: BotAPI, message: GroupMessage, params=None, requests=None):
+    url = "https://forum.mysit.life/api/discussions?sort=-commentCount&page%5Blimit%5D=10"
+    headers = {
+        "Authorization": f"Token {r.token}"
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            if response.status == 200:
+                data = await response.json()
+                titles = [discussion.get('attributes', {}).get('title') for discussion in data.get('data', [])]
+
+                reply_content = "\n".join([f"{i}. {title}" for i, title in enumerate(titles, start=1)])
+            else:
+                reply_content = f"请求失败，状态码: {response.status}"
+            await message.reply(content=reply_content)
+    return True
+
 
 handlers = [
     query_electricity_balance,
     query_weather,
     query_school_server,
     download_address,
+    forum_hot_discussion,
 ]
 
 

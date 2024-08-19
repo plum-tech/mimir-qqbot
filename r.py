@@ -23,3 +23,8 @@ backend_elec_token = os.getenv("MIMIR_ELEC_ADMIN_TOKEN")
 weather_api_token = os.getenv("AMAP_WEATHER_API_TOKEN")
 if weather_api_token is None:
     raise Exception('Missing "AMAP_WEATHER_API_TOKEN" environment variable for your AppSecret')
+
+
+token = os.getenv("FORUM_TOKEN")
+if weather_api_token is None:
+    raise Exception('Missing "FORUM_TOKEN" environment variable for your AppSecret')
