@@ -23,11 +23,11 @@ async def on_mimir_backend_error(message: GroupMessage):
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
     try:
         async with session.get(
-                f"{r.backend_elec}/query", params={
-                    "raw": params
-                }, headers={
-                    "Cookie": f"MIMIR_ELEC_ELEVATED_TOKEN={r.backend_elec_token}"
-                }
+          f"{r.backend_elec}/query", params={
+              "raw": params
+          }, headers={
+              "Cookie": f"MIMIR_ELEC_ELEVATED_TOKEN={r.backend_elec_token}"
+          }
         ) as res:
             result = await res.json()
             if res.ok:
@@ -137,23 +137,23 @@ async def download_address(api: BotAPI, message: GroupMessage, params=None):
     )
     return True
 
+
 @Commands("十大热帖")
 async def forum_hot_discussion(api: BotAPI, message: GroupMessage, params=None, requests=None):
     url = "https://forum.mysit.life/api/discussions?sort=-commentCount&page%5Blimit%5D=10"
     headers = {
-        "Authorization": f"Token {r.token}"
+        "Authorization": f"Token {r.forum_token}"
     }
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as response:
-            if response.status == 200:
-                data = await response.json()
-                titles = [discussion.get('attributes', {}).get('title') for discussion in data.get('data', [])]
+    async with session.get(url, headers=headers) as response:
+        if response.status == 200:
+            data = await response.json()
+            titles = [discussion.get('attributes', {}).get('title') for discussion in data.get('data', [])]
 
-                reply_content = "\n".join([f"{i}. {title}" for i, title in enumerate(titles, start=1)])
-            else:
-                reply_content = f"请求失败，状态码: {response.status}"
-            await message.reply(content=reply_content)
+            reply_content = "\n".join([f"{i}. {title}" for i, title in enumerate(titles, start=1)])
+        else:
+            reply_content = f"请求失败，状态码: {response.status}"
+        await message.reply(content="\n" + reply_content)
     return True
 
 
