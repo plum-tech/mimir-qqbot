@@ -21,6 +21,7 @@ services:
       QQBOT_APP_ID: <your qq bot app id>
       QQBOT_APP_SECRET: <your qq bot app secret>
       MIMIR_ELEC_ADMIN_TOKEN: <backend elec token>
+      MIMIR_FORUM_TOKEN: <forum token>
       AMAP_WEATHER_API_TOKEN: <amap weather api token>
     restart: always
 ```
