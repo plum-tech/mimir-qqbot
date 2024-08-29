@@ -17,7 +17,7 @@ services:
     image: cr.liplum.net/mimir/qqbot:<tag>
     container_name: mimir.qqbot
     environment:
-      QQBOT_SANDBOX: <0 or 1>
+      QQBOT_SANDBOX: <true or false>
       QQBOT_APP_ID: <your qq bot app id>
       QQBOT_APP_SECRET: <your qq bot app secret>
       MIMIR_ELEC_ADMIN_TOKEN: <backend elec token>

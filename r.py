@@ -1,9 +1,10 @@
 import os
 from dotenv import load_dotenv
+from str2bool3 import str2bool
 
 load_dotenv()
 
-sandboxed = bool(os.getenv("QQBOT_SANDBOX"))
+sandboxed = str2bool(os.getenv("QQBOT_SANDBOX"))
 if sandboxed:
     print("Bot is running in sandboxed environment.")
 else:
@@ -23,7 +24,6 @@ backend_elec_token = os.getenv("MIMIR_ELEC_ADMIN_TOKEN")
 weather_api_token = os.getenv("AMAP_WEATHER_API_TOKEN")
 if weather_api_token is None:
     raise Exception('Missing "AMAP_WEATHER_API_TOKEN" environment variable for your AppSecret')
-
 
 forum_token = os.getenv("MIMIR_FORUM_TOKEN")
 if forum_token is None:
