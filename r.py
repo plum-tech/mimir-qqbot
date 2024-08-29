@@ -17,9 +17,14 @@ secret = os.getenv("QQBOT_APP_SECRET")
 if secret is None:
     raise Exception('Missing "QQBOT_APP_SECRET" environment variable for your AppSecret')
 
-backend_elec = os.getenv("MIMIR_BACKEND_ELEC_URL", default="http://elec.api.mysit.life/v1")
-backend_elec_token = os.getenv("MIMIR_ELEC_ELEVATED_TOKEN")
+backend_elec = os.getenv("MIMIR_ELEC_URL", default="http://elec.api.mysit.life/v1")
+backend_elec_token = os.getenv("MIMIR_ELEC_ADMIN_TOKEN")
 
 weather_api_token = os.getenv("AMAP_WEATHER_API_TOKEN")
 if weather_api_token is None:
     raise Exception('Missing "AMAP_WEATHER_API_TOKEN" environment variable for your AppSecret')
+
+
+forum_token = os.getenv("MIMIR_FORUM_TOKEN")
+if forum_token is None:
+    raise Exception('Missing "MIMIR_FORUM_TOKEN" environment variable for your AppSecret')
