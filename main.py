@@ -26,7 +26,7 @@ async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=N
                 f"{r.backend_elec}/query", params={
                     "raw": params
                 }, headers={
-                    "Cookie": f"MIMIR_ELEC_ELEVATED_TOKEN={r.backend_elec_token}"
+                    "Cookie": f"MIMIR_ELEC_ADMIN_TOKEN={r.backend_elec_token}"
                 }
         ) as res:
             result = await res.json()
