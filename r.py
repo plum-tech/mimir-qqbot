@@ -5,10 +5,6 @@ from str2bool3 import str2bool
 load_dotenv()
 
 sandboxed = str2bool(os.getenv("QQBOT_SANDBOX"))
-if sandboxed:
-    print("Bot is running in sandboxed environment.")
-else:
-    print("Bot is running in production environment.")
 
 appid = os.getenv("QQBOT_APP_ID")
 if appid is None:

@@ -23,11 +23,11 @@ async def on_mimir_backend_error(message: GroupMessage):
 async def query_electricity_balance(api: BotAPI, message: GroupMessage, params=None):
     try:
         async with session.get(
-          f"{r.backend_elec}/query", params={
-              "raw": params
-          }, headers={
-              "Cookie": f"MIMIR_ELEC_ELEVATED_TOKEN={r.backend_elec_token}"
-          }
+                f"{r.backend_elec}/query", params={
+                    "raw": params
+                }, headers={
+                    "Cookie": f"MIMIR_ELEC_ELEVATED_TOKEN={r.backend_elec_token}"
+                }
         ) as res:
             result = await res.json()
             if res.ok:
@@ -194,6 +194,10 @@ async def main():
         # public_guild_messages=True,
         # direct_message=True,
     )
+    if r.sandboxed:
+        _log.warning("Bot is running in sandboxed environment.")
+    else:
+        _log.info("Bot is running in production environment.")
     client = MimirClient(intents=intents, is_sandbox=r.sandboxed, log_level=10, timeout=30)
     await client.start(appid=r.appid, secret=r.secret)
     await session.close()
