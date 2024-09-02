@@ -113,10 +113,8 @@ async def check_school_service_status(api: BotAPI, message: GroupMessage, params
     status_dict = dict(statuses)
 
     reply_content = (
-        f"\n"
-        f"教务系统: {status_dict['教务系统']}\n"
-        f"电费服务器: {status_dict['电费服务器']}\n"
-        f"消费服务器: {status_dict['消费服务器']}"
+            f"\n" +
+            "\n".join([f"{name}: {status}" for name, status in status_dict.items()])
     )
 
     await message.reply(content=reply_content)
