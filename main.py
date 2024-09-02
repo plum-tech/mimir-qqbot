@@ -87,14 +87,15 @@ async def query_weather(api: BotAPI, message: GroupMessage, params=None):
 
 school_server_urls = {
     "教务系统": "https://xgfy.sit.edu.cn/unifri-flow/WF/Comm/ProcessRequest.do?DoType=DBAccess_RunSQLReturnTable",
-    "电费服务器": "https://myportal.sit.edu.cn/?rnd=1",
-    "消费服务器": "https://xgfy.sit.edu.cn/yktapi/services/querytransservice/querytrans"
+    "电费服务": "https://myportal.sit.edu.cn/?rnd=1",
+    "消费记录服务": "https://xgfy.sit.edu.cn/yktapi/services/querytransservice/querytrans",
+    "应网办": "https://ywb.sit.edu.cn/v1",
 }
 
 
 @Commands("服务状态")
-async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
-    async def fetch_status(name, url):
+async def check_school_service_status(api: BotAPI, message: GroupMessage, params=None):
+    async def check_status(name, url):
         try:
             async with session.get(url, timeout=8) as response:
                 if response.status == 200:
@@ -106,7 +107,7 @@ async def query_school_server(api: BotAPI, message: GroupMessage, params=None):
         except aiohttp.ClientError:
             return name, "连接超时"
 
-    tasks = [fetch_status(name, url) for name, url in school_server_urls.items()]
+    tasks = [check_status(name, url) for name, url in school_server_urls.items()]
     statuses = await asyncio.gather(*tasks)
 
     status_dict = dict(statuses)
@@ -160,7 +161,7 @@ async def forum_hot_discussion(api: BotAPI, message: GroupMessage, params=None, 
 handlers = [
     query_electricity_balance,
     query_weather,
-    query_school_server,
+    check_school_service_status,
     download_address,
     forum_hot_discussion,
 ]
